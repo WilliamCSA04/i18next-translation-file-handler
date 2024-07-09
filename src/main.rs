@@ -1,3 +1,4 @@
+mod utils;
 use std::{
     collections::HashMap,
     error::Error,
@@ -34,7 +35,10 @@ fn main() {
         println!("Reading file: {}", file_path);
         match read_file(file_path) {
             Ok(contents) => {
-                println!("Contents: {}", contents);
+                println!(
+                    "Contents: {}",
+                    utils::remove_new_lines_and_whitespace(contents)
+                );
             }
             Err(e) => {
                 println!("Error: {}", e);
