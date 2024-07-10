@@ -5,35 +5,32 @@ use std::{
     fs::{self},
 };
 
+use walkdir::WalkDir;
+
 fn read_file(path: &str) -> Result<String, Box<dyn Error>> {
     let file = fs::read_to_string(path)?;
     println!("Read file: {}", file);
     Ok(file)
 }
 
-fn get_translations(path: &str) -> Result<HashMap<String, String>, Box<dyn Error>> {
-    let contents = read_file(path)?;
-    let mut translations = HashMap::new();
-    for line in contents.lines() {
-        let line = line.trim();
-        if line.is_empty() {
-            continue;
+fn get_all_files_from_dir(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
+    let mut files = Vec::new();
+    for entry in WalkDir::new(path)
+        .into_iter()
+        .filter_map(|e: Result<walkdir::DirEntry, walkdir::Error>| e.ok())
+    {
+        if entry.metadata()?.is_file() {
+            files.push(entry.path().display().to_string());
         }
-        let mut parts = line.splitn(2, '=');
-        let key = parts.next().unwrap();
-        let value = parts.next().unwrap();
-        translations.insert(key.to_string(), value.to_string());
     }
-    Ok(translations)
+    Ok(files)
 }
 
 fn main() {
-    let paths = fs::read_dir("./src/i18n").unwrap();
-    for path in paths {
-        let path = path.unwrap().path();
-        let file_path = path.to_str().unwrap();
+    let files = get_all_files_from_dir("./src/i18n").unwrap();
+    for file_path in files {
         println!("Reading file: {}", file_path);
-        match read_file(file_path) {
+        match read_file(&file_path) {
             Ok(contents) => {
                 println!(
                     "Contents: {}",
