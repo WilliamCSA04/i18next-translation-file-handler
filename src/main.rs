@@ -13,7 +13,7 @@ fn read_file(path: &str) -> Result<String, Box<dyn Error>> {
     Ok(file)
 }
 
-fn get_all_files_from_dir(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
+fn get_all_files_paths(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
     let mut files = Vec::new();
     for entry in WalkDir::new(path)
         .into_iter()
@@ -23,11 +23,12 @@ fn get_all_files_from_dir(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
             files.push(entry.path().display().to_string());
         }
     }
+
     Ok(files)
 }
 
 fn main() {
-    let files = get_all_files_from_dir("./src/i18n").unwrap();
+    let files = get_all_files_paths("./src/i18n").unwrap();
     for file_path in files {
         println!("Reading file: {}", file_path);
         match read_file(&file_path) {
