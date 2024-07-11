@@ -28,15 +28,17 @@ fn get_all_files_paths(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
 }
 
 fn main() {
-    let files = get_all_files_paths("./src/i18n").unwrap();
+    let files = get_all_files_paths("./src/react").unwrap();
     for file_path in files {
         println!("Reading file: {}", file_path);
         match read_file(&file_path) {
             Ok(contents) => {
-                println!(
-                    "Contents: {}",
-                    utils::remove_new_lines_and_whitespace(contents)
+                let keys = utils::get_i18next_keys(
+                    utils::remove_using_regex(r"\s+", contents)
+                        .trim()
+                        .to_string(),
                 );
+                println!("Keys: {:?}", keys);
             }
             Err(e) => {
                 println!("Error: {}", e);
