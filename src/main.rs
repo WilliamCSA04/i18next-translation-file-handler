@@ -2,7 +2,8 @@ mod utils;
 use std::{
     collections::HashSet,
     error::Error,
-    fs::{self},
+    fs::{self, File},
+    io::Write,
 };
 
 use walkdir::WalkDir;
@@ -26,12 +27,18 @@ fn get_all_files_paths(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
     Ok(files)
 }
 
+fn write_file(path: &str, content: &str) -> Result<File, Box<dyn Error>> {
+    let mut file = File::create(path)?;
+    file.write_all(content.as_bytes())?;
+    Ok(file)
+}
+
 fn main() {
     let files: Vec<String> = get_all_files_paths("./src/react").unwrap();
     let mut file_keys = HashSet::new();
-    for file_path in files {
+    for file in files {
         println!("Reading file...");
-        match read_file(&file_path) {
+        match read_file(&file) {
             Ok(contents) => {
                 let content = utils::remove_using_regex(r"\s+", contents)
                     .trim()
@@ -46,5 +53,6 @@ fn main() {
             }
         }
     }
-    println!("F Keys: {:?}", file_keys);
+    let content = file_keys.into_iter().collect::<String>();
+    write_file("./src/i18n/keys.txt", &content);
 }

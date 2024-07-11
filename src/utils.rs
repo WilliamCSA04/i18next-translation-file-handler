@@ -1,5 +1,3 @@
-use std::os::unix::process;
-
 use regex::Regex;
 
 pub fn remove_using_regex(re: &str, s: String) -> String {
