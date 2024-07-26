@@ -1,17 +1,8 @@
+mod file;
 mod utils;
-use std::{
-    collections::HashSet,
-    error::Error,
-    fs::{self, File},
-    io::Write,
-};
+use std::{collections::HashSet, error::Error};
 
 use walkdir::WalkDir;
-
-fn read_file(path: &str) -> Result<String, Box<dyn Error>> {
-    let file = fs::read_to_string(path)?;
-    Ok(file)
-}
 
 fn get_all_files_paths(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
     let mut files = Vec::new();
@@ -27,18 +18,12 @@ fn get_all_files_paths(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
     Ok(files)
 }
 
-fn write_file(path: &str, content: &str) -> Result<File, Box<dyn Error>> {
-    let mut file = File::create(path)?;
-    file.write_all(content.as_bytes())?;
-    Ok(file)
-}
-
 fn get_all_keys(files: Vec<String>) -> HashSet<String> {
     let mut file_keys = HashSet::new();
 
     for file in files {
         println!("Reading file...");
-        match read_file(&file) {
+        match file::read_file(&file) {
             Ok(contents) => {
                 let content = utils::remove_using_regex(r"\s+", contents)
                     .trim()
