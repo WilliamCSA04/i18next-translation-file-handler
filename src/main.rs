@@ -42,8 +42,30 @@ fn get_all_keys(files: Vec<String>) -> HashSet<String> {
     return file_keys;
 }
 
+fn json_string_from_keys(keys: Vec<String>) -> String {
+    let mut json = String::new();
+    json.push_str("{\n");
+    for key in keys {
+        let key_parts: Vec<String> = key.split(".").map(|s| s.to_string()).collect();
+        if key_parts.len() > 1 {
+            json.push_str(&format!(
+                "    \"{}\": {},\n",
+                key,
+                json_string_from_keys(key_parts)
+            ));
+        } else {
+            json.push_str(&format!("    \"{}\": {},\n", key, ""));
+        }
+    }
+    json.push_str("}");
+    return json;
+}
+
 fn main() {
     let files: Vec<String> = get_all_files_paths("./src/react").unwrap();
     let file_keys = get_all_keys(files);
-    println!("File keys: {:?}", file_keys);
+    let file_keys: Vec<String> = file_keys.into_iter().collect();
+    let json = json_string_from_keys(file_keys);
+
+    println!("File keys: {:?}", json);
 }
