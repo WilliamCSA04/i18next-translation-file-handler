@@ -39,26 +39,37 @@ fn get_all_keys(files: Vec<String>) -> HashSet<String> {
         }
     }
 
-    return file_keys;
+    file_keys
 }
 
 fn json_string_from_keys(keys: Vec<String>) -> String {
-    let mut json = String::new();
-    json.push_str("{\n");
-    for key in keys {
-        let key_parts: Vec<String> = key.split(".").map(|s| s.to_string()).collect();
-        if key_parts.len() > 1 {
-            json.push_str(&format!(
-                "    \"{}\": {},\n",
-                key,
-                json_string_from_keys(key_parts)
-            ));
-        } else {
-            json.push_str(&format!("    \"{}\": {},\n", key, ""));
+    fn insert_key(map: &mut serde_json::Map<String, serde_json::Value>, key_parts: &[&str]) {
+        match key_parts {
+            [head, tail @ ..] if !tail.is_empty() => {
+                let entry = map
+                    .entry((*head).to_string())
+                    .or_insert_with(|| serde_json::json!({}));
+                if let serde_json::Value::Object(ref mut sub_map) = entry {
+                    insert_key(sub_map, tail);
+                }
+            }
+            [head] => {
+                map.insert(
+                    (*head).to_string(),
+                    serde_json::Value::String(String::new()),
+                );
+            }
+            _ => {}
         }
     }
-    json.push_str("}");
-    return json;
+
+    let mut map = serde_json::Map::new();
+    for key in keys {
+        let key_parts: Vec<&str> = key.split('.').collect();
+        insert_key(&mut map, &key_parts);
+    }
+
+    serde_json::to_string_pretty(&serde_json::Value::Object(map)).unwrap()
 }
 
 fn main() {
@@ -66,6 +77,7 @@ fn main() {
     let file_keys = get_all_keys(files);
     let file_keys: Vec<String> = file_keys.into_iter().collect();
     let json = json_string_from_keys(file_keys);
+    let _ = file::write_file("./src/i18n/keys.json", &json);
 
     println!("File keys: {:?}", json);
 }
