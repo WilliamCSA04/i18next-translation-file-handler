@@ -17,7 +17,6 @@ pub fn get_i18next_keys(s: String) -> Vec<String> {
             processed_keys.push(text);
         });
     });
-
     let key_list: std::vec::IntoIter<String> = processed_keys.into_iter();
     let filtered_keys = key_list.filter(|k| k != "");
     return filtered_keys.into_iter().collect();

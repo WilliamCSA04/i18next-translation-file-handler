@@ -33,9 +33,9 @@ fn write_file(path: &str, content: &str) -> Result<File, Box<dyn Error>> {
     Ok(file)
 }
 
-fn main() {
-    let files: Vec<String> = get_all_files_paths("./src/react").unwrap();
+fn get_all_keys(files: Vec<String>) -> HashSet<String> {
     let mut file_keys = HashSet::new();
+
     for file in files {
         println!("Reading file...");
         match read_file(&file) {
@@ -53,6 +53,12 @@ fn main() {
             }
         }
     }
-    let content = file_keys.into_iter().collect::<String>();
-    write_file("./src/i18n/keys.txt", &content);
+
+    return file_keys;
+}
+
+fn main() {
+    let files: Vec<String> = get_all_files_paths("./src/react").unwrap();
+    let file_keys = get_all_keys(files);
+    println!("File keys: {:?}", file_keys);
 }
