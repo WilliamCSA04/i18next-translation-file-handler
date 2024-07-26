@@ -1,4 +1,0 @@
-another.key
-welcome
-anotherkey
-here.is.another.key

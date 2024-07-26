@@ -73,11 +73,11 @@ fn json_string_from_keys(keys: Vec<String>) -> String {
 }
 
 fn main() {
-    let files: Vec<String> = get_all_files_paths("./src/react").unwrap();
+    let files: Vec<String> = get_all_files_paths("./src/input").unwrap();
     let file_keys = get_all_keys(files);
     let file_keys: Vec<String> = file_keys.into_iter().collect();
     let json = json_string_from_keys(file_keys);
-    let _ = file::write_file("./src/i18n/keys.json", &json);
+    let _ = file::write_file("./src/output/keys.json", &json);
 
     println!("File keys: {:?}", json);
 }
