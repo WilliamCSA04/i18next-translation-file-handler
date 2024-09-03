@@ -1,10 +1,13 @@
 mod file;
 mod utils;
+use clap::{self, Command};
+use log::{self, error, info, warn};
 use std::{collections::HashSet, error::Error};
 
 use walkdir::WalkDir;
 
 fn get_all_files_paths(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
+    info!("Getting all files paths");
     let mut files = Vec::new();
     for entry in WalkDir::new(path)
         .into_iter()
@@ -14,7 +17,7 @@ fn get_all_files_paths(path: &str) -> Result<Vec<String>, Box<dyn Error>> {
             files.push(entry.path().display().to_string());
         }
     }
-
+    info!("Finished getting all files paths");
     Ok(files)
 }
 
@@ -22,19 +25,17 @@ fn get_all_keys(files: Vec<String>) -> HashSet<String> {
     let mut file_keys = HashSet::new();
 
     for file in files {
-        println!("Reading file...");
+        info!("Reading file...");
         match file::read_file(&file) {
             Ok(contents) => {
                 let content = utils::remove_using_regex(r"\s+", contents)
                     .trim()
                     .to_string();
-                println!("Content: {}", content);
                 let keys: Vec<String> = utils::get_i18next_keys(content);
-                println!("Keys: {:?}", keys);
                 file_keys.extend(keys);
             }
             Err(e) => {
-                println!("Error: {}", e);
+                error!("Error: {}", e);
             }
         }
     }
@@ -43,6 +44,7 @@ fn get_all_keys(files: Vec<String>) -> HashSet<String> {
 }
 
 fn json_string_from_keys(keys: Vec<String>) -> String {
+    info!("Creating json string from keys");
     fn insert_key(map: &mut serde_json::Map<String, serde_json::Value>, key_parts: &[&str]) {
         match key_parts {
             [head, tail @ ..] if !tail.is_empty() => {
@@ -68,16 +70,27 @@ fn json_string_from_keys(keys: Vec<String>) -> String {
         let key_parts: Vec<&str> = key.split('.').collect();
         insert_key(&mut map, &key_parts);
     }
-
+    info!("Finished creating json string from keys");
     serde_json::to_string_pretty(&serde_json::Value::Object(map)).unwrap()
 }
 
 fn main() {
-    let files: Vec<String> = get_all_files_paths("./src/input").unwrap();
-    let file_keys = get_all_keys(files);
-    let file_keys: Vec<String> = file_keys.into_iter().collect();
-    let json = json_string_from_keys(file_keys);
-    let _ = file::write_file("./src/output/keys.json", &json);
+    let matches = Command::new("i18next translation file handler")
+        .version("0.1")
+        .about("generates a json file with all the keys from pages")
+        .subcommand(Command::new("create").about("Creates something"))
+        .get_matches();
 
-    println!("File keys: {:?}", json);
+    match matches.subcommand() {
+        Some(("create", _sub_m)) => {
+            let files: Vec<String> = get_all_files_paths("./src/input").unwrap();
+            let file_keys = get_all_keys(files);
+            let file_keys: Vec<String> = file_keys.into_iter().collect();
+            let json = json_string_from_keys(file_keys);
+            let _ = file::write_file("./src/output/keys.json", &json);
+        }
+        _ => {
+            warn!("Unknown command");
+        }
+    }
 }
