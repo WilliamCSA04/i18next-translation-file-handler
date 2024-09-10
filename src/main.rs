@@ -2,7 +2,6 @@ mod file;
 mod utils;
 use clap::{self, Command};
 use log::{self, warn};
-use utils::{get_all_keys, json_string_from_keys};
 
 fn main() {
     let matches = Command::new("i18next translation file handler")
@@ -14,9 +13,9 @@ fn main() {
     match matches.subcommand() {
         Some(("create", _sub_m)) => {
             let files: Vec<String> = utils::get_all_files_paths("./src/input").unwrap();
-            let file_keys = get_all_keys(files);
+            let file_keys = utils::get_all_keys(files);
             let file_keys: Vec<String> = file_keys.into_iter().collect();
-            let json = json_string_from_keys(file_keys);
+            let json = utils::json_string_from_keys(file_keys);
             let _ = file::write_file("./src/output/keys.json", &json);
         }
         _ => {
