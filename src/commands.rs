@@ -7,3 +7,7 @@ pub fn create() {
     let json = utils::json_string_from_keys(file_keys);
     let _ = file::write_file("./src/output/keys.json", &json);
 }
+
+pub fn update() {
+    log::error!("Not implemented yet");
+}

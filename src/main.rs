@@ -15,6 +15,9 @@ fn main() {
         Some(("create", _sub_m)) => {
             commands::create();
         }
+        Some(("update", _sub_m)) => {
+            commands::update();
+        }
         _ => {
             warn!("Unknown command");
         }
