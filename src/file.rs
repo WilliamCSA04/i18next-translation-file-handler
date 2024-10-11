@@ -13,3 +13,8 @@ pub fn read_file(path: &str) -> Result<String, Box<dyn Error>> {
     let file = fs::read_to_string(path)?;
     Ok(file)
 }
+
+pub fn delete_file(path: &str) -> Result<(), Box<dyn Error>> {
+    fs::remove_file(path)?;
+    Ok(())
+}
